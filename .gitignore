@@ -8,10 +8,6 @@ npm-debug.log
 *.log
 **/**/.DS_Store
 
-# produced by vbuild
-dist
-dist-example
-
 dev/cloudinary.vue
 dev/Backup-App.vue
 NOTES.md
