@@ -1,9 +1,5 @@
 <template>
-  <div class="quillWrapper">
-    <slot name="toolbar"></slot>
-    <div :id="id" ref="quillContainer"></div>
-    <input v-if="useCustomImageHandler" @change="emitImageInfo($event)" ref="fileInput" id="file-upload" type="file" accept="image/*" style="display:none;">
-  </div>
+  <div class="quillWrapper"><slot name="toolbar"></slot><div :id="id" ref="quillContainer"></div><input v-if="useCustomImageHandler" @change="emitImageInfo($event)" ref="fileInput" id="file-upload" type="file" accept="image/*" style="display:none;"></div>
 </template>
 
 <script>
