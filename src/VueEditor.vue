@@ -1,5 +1,5 @@
 <template>
-  <div class="quillWrapper"><slot name="toolbar"></slot><div :id="id" ref="quillContainer"></div><input v-if="useCustomImageHandler" @change="emitImageInfo($event)" ref="fileInput" id="file-upload" type="file" accept="image/*" style="display:none;"></div>
+  <div class="quill-wrapper" :class="{ 'quill-preview': preview }"><slot name="toolbar"></slot><div :id="id" ref="quillContainer"></div><input v-if="useCustomImageHandler" @change="emitImageInfo($event)" ref="fileInput" id="file-upload" type="file" accept="image/*" style="display:none;"></div>
 </template>
 
 <script>
@@ -8,6 +8,7 @@ import defaultToolbar from "./helpers/default-toolbar";
 import merge from "lodash.merge";
 import oldApi from "./helpers/old-api";
 import MarkdownShortcuts from "./helpers/markdown-shortcuts";
+import PlainClipboard from "./helpers/plain-clipboard";
 
 const Quill = window.Quill || _Quill;
 
@@ -28,7 +29,12 @@ export default {
       default: ""
     },
     disabled: {
-      type: Boolean
+      type: Boolean,
+      default: false,
+    },
+    preview: {
+      type: Boolean,
+      default: false,
     },
     editorToolbar: Array,
     editorOptions: {
@@ -43,6 +49,10 @@ export default {
     useMarkdownShortcuts: {
       type: Boolean,
       default: false
+    },
+    usePlainClipboard: {
+      type: Boolean,
+      default: true
     }
   },
 
@@ -52,6 +62,7 @@ export default {
 
   mounted() {
     this.registerCustomModules(Quill);
+    this.registerPlainClipboard();
     this.registerPrototypes();
     this.initializeEditor();
   },
@@ -72,7 +83,7 @@ export default {
         modules: this.setModules(),
         theme: "snow",
         placeholder: this.placeholder ? this.placeholder : "",
-        readOnly: this.disabled ? this.disabled : false
+        readOnly: this.disabled
       };
 
       this.prepareEditorConfig(editorConfig);
@@ -103,6 +114,12 @@ export default {
           delete editorConfig.modules.toolbar;
         }
         merge(editorConfig, this.editorOptions);
+      }
+    },
+
+    registerPlainClipboard() {
+      if (this.usePlainClipboard) {
+        Quill.register("modules/clipboard", PlainClipboard, true);
       }
     },
 
@@ -195,7 +212,5 @@ export default {
 };
 </script>
 
-<style src="quill/dist/quill.snow.css">
-</style>
-<style src="./styles/vue2-editor.scss" lang='scss'>
-</style>
+<style src="quill/dist/quill.snow.css"></style>
+<style src="./styles/vue2-editor.scss" lang='scss'></style>

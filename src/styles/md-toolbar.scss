@@ -10,7 +10,7 @@ button.ql-active svg {
   fill: rgba(97, 97, 97, 0.98) !important;
 }
 
-.quillWrapper .ql-snow.ql-toolbar button {
+.quill-wrapper .ql-snow.ql-toolbar button {
   margin: 1px 2px;
   display: flex;
   padding: 3px;
@@ -33,7 +33,7 @@ button.ql-active svg {
   background: rgba(203, 201, 201, 0.9) !important;
 }
 
-.quillWrapper .ql-toolbar {
+.quill-wrapper .ql-toolbar {
   padding-bottom: 4px;
   display: flex;
   align-items: center;
