@@ -36,7 +36,10 @@ export default {
       type: Boolean,
       default: false,
     },
-    editorToolbar: Array,
+    editorToolbar:  {
+      type: Array,
+      default: null,
+    },
     editorOptions: {
       type: Object,
       required: false,
@@ -55,6 +58,10 @@ export default {
   data: () => ({
     quill: null
   }),
+
+  computed: {
+    _disabled() { return this.preview || this.disabled }
+  },
 
   mounted() {
     this.registerCustomModules(Quill);
@@ -79,7 +86,7 @@ export default {
         modules: this.setModules(),
         theme: "snow",
         placeholder: this.placeholder ? this.placeholder : "",
-        readOnly: this.disabled
+        readOnly: this._disabled
       };
 
       this.prepareEditorConfig(editorConfig);
@@ -118,11 +125,15 @@ export default {
     },
 
     registerPrototypes() {
+      const self = this;
       Quill.prototype.getHTML = function() {
-        return this.container.querySelector(".ql-editor").innerHTML;
+        return this.root.innerHTML;
       };
       Quill.prototype.getWordCount = function() {
-        return this.container.querySelector(".ql-editor").innerText.length;
+        return this.root.innerText.length;
+      };
+      Quill.prototype.isPreview = function() {
+        return self.preview;
       };
     },
 
@@ -190,11 +201,11 @@ export default {
 
   watch: {
     value(val) {
-      if (val != this.quill.root.innerHTML && !this.quill.hasFocus()) {
+      if (val !== this.quill.getHTML() && !this.quill.hasFocus()) {
         this.quill.root.innerHTML = val;
       }
     },
-    disabled(status) {
+    _disabled(status) {
       this.quill.enable(!status);
     }
   },
