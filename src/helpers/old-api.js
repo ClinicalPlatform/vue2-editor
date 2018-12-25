@@ -1,10 +1,13 @@
 export default {
   props: {
-    customModules: Array
+    customModules: {
+      type: Array,
+      default: () => ([])
+    },
   },
   methods: {
     registerCustomModules(Quill) {
-      if (this.customModules !== undefined) {
+      if (Array.isArray(this.customModules)) {
         this.customModules.forEach(customModule => {
           Quill.register("modules/" + customModule.alias, customModule.module, customModule.overwrite);
         });
