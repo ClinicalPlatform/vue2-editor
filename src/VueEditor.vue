@@ -50,10 +50,6 @@ export default {
       type: Boolean,
       default: false
     },
-    usePlainClipboard: {
-      type: Boolean,
-      default: true
-    }
   },
 
   data: () => ({
@@ -118,9 +114,7 @@ export default {
     },
 
     registerPlainClipboard() {
-      if (this.usePlainClipboard) {
-        Quill.register("modules/clipboard", PlainClipboard, true);
-      }
+      Quill.register("modules/clipboard", PlainClipboard, true);
     },
 
     registerPrototypes() {
