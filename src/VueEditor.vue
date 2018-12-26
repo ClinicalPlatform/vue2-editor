@@ -64,10 +64,13 @@ export default {
     _disabled() { return this.preview || this.disabled }
   },
 
-  mounted() {
+  created() {
     this.registerCustomModules(Quill);
     this.registerPlainClipboard();
     this.registerPrototypes();
+  },
+
+  mounted() {
     this.initializeEditor();
   },
 
