@@ -7,6 +7,11 @@
     .ql-container {
       border: none;
     }
+    &.quill-hide {
+      .ql-container {
+        display: none;
+      }
+    }
   }
 }
 

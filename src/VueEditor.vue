@@ -1,5 +1,5 @@
 <template>
-  <div class="quill-wrapper" :class="{ 'quill-preview': preview }"><slot name="toolbar"></slot><div :id="id" ref="quillContainer"></div><input v-if="useCustomImageHandler" @change="emitImageInfo($event)" ref="fileInput" id="file-upload" type="file" accept="image/*" style="display:none;"></div>
+  <div class="quill-wrapper" :class="{ 'quill-preview': preview, 'quill-hide': hide }"><slot name="toolbar"></slot><div :id="id" ref="quillContainer"></div><input v-if="useCustomImageHandler" @change="emitImageInfo($event)" ref="fileInput" id="file-upload" type="file" accept="image/*" style="display:none;"></div>
 </template>
 
 <script>
@@ -60,6 +60,7 @@ export default {
   }),
 
   computed: {
+    hide() { return this.preview && this.value === '' },
     _disabled() { return this.preview || this.disabled }
   },
 
