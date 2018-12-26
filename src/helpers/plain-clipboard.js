@@ -10,6 +10,18 @@ class PlainClipboard extends Clipboard {
     this.quill.root.addEventListener('cut', e => this.onCaptureCopy(e, true));
   }
 
+  dangerouslyPasteHTML(index, html, source = Quill.sources.API) {
+    if (typeof index === 'string') {
+      this.quill.setContents(this.convert(index + '<p><br></p>'), html);
+      this.quill.setSelection(this.quill.getLength(), Quill.sources.SILENT);
+    } else {
+      const _html = typeof html === 'string' ? html + '<p><br></p>' : html;
+      const paste = this.convert(_html);
+      this.quill.updateContents(new Delta().retain(index).concat(paste), source);
+      this.quill.setSelection(index + paste.length(), Quill.sources.SILENT);
+    }
+  }
+
   onCaptureCopy(e, isCut = false) {
     if (e.defaultPrevented) return;
     e.preventDefault();
