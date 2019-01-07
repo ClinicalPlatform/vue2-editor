@@ -78,7 +78,7 @@ export default {
     initializeEditor() {
       this.setupQuillEditor();
       this.checkForCustomImageHandler();
-      this.handleInitialContent();
+      this.setContent(this.value);
       this.registerEditorEventListeners();
       this.disableDropEvent();
       this.$emit("ready", this.quill);
@@ -155,11 +155,6 @@ export default {
       });
     },
 
-    handleInitialContent() {
-      // Set initial editor content
-      this.quill.pasteHTML(this.value);
-    },
-
     handleSelectionChange(range, oldRange) {
       if (!range && oldRange) this.$emit("blur", this.quill);
       else if (range && !oldRange) this.$emit("focus", this.quill);
@@ -201,6 +196,12 @@ export default {
         e.preventDefault();
         return false;
       });
+    },
+
+    setContent(value) {
+      this.quill.root.innerHTML = value;
+      this.quill.update(Quill.sources.API);
+      this.quill.setSelection(this.quill.getLength(), Quill.sources.SILENT);
     }
   },
 
@@ -208,7 +209,7 @@ export default {
     value(val) {
       if (this.quill.hasFocus()) return;
       if (val !== this.quill.getHTML()) {
-        this.quill.pasteHTML(val);
+        this.setContent(val);
       }
     },
     _disabled(status) {
