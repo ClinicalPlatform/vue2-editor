@@ -62,6 +62,7 @@ export default {
       this.checkForCustomImageHandler();
       this.handleInitialContent();
       this.registerEditorEventListeners();
+      this.disableDropEvent();
       this.$emit("ready", this.quill);
     },
 
@@ -166,6 +167,13 @@ export default {
       let range = Editor.getSelection();
       let cursorLocation = range.index;
       this.$emit("imageAdded", file, Editor, cursorLocation, resetUploader);
+    },
+
+    disableDropEvent() {
+      this.quill.root.addEventListener("drop", e => {
+        e.preventDefault();
+        return false;
+      });
     }
   },
 
