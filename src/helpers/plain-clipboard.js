@@ -63,35 +63,48 @@ class PlainClipboard extends Clipboard {
   }
 
   onPaste (e) {
-    this.quill.history.cutoff();
-    if (this.isDelta(e.clipboardData.getData('application/json'))) {
-      super.onPaste(e);
-      return;
-    }
-    this.onPastePlain(e);
-  }
-
-  onPastePlain (e) {
     if (e.defaultPrevented || !this.quill.isEnabled()) return;
     e.preventDefault();
 
+    this.quill.history.cutoff();
+
+    if (this.isDelta(e.clipboardData.getData('application/json'))) {
+      this.onCapturePaste(e);
+      return;
+    }
+    this.onPlainPaste(e);
+  }
+
+  onCapturePaste(e) {
+    const range = this.quill.getSelection(true);
+    if (range == null) return;
+
+    const html = e.clipboardData.getData('text/html');
+    const pastedDelta = this.convert(html);
+
+    const delta = new Delta()
+      .retain(range.index)
+      .delete(range.length)
+      .concat(pastedDelta);
+
+    this.quill.updateContents(delta, Quill.sources.USER);
+    this.quill.setSelection((delta.length() - range.length), Quill.sources.SILENT);
+    this.quill.scrollIntoView();
+  }
+
+  onPlainPaste (e) {
+    const range = this.quill.getSelection(true);
+    if (range == null) return;
+
     const text = e.clipboardData.getData('text/plain');
-    const range = this.quill.getSelection();
     const delta = new Delta()
       .retain(range.index)
       .delete(range.length)
       .insert(text);
 
-    const scrollTop = this.quill.scrollingContainer.scrollTop;
-    this.container.focus();
-    this.quill.selection.update(Quill.sources.SILENT);
-
-    setTimeout(() => {
-      this.quill.updateContents(delta, Quill.sources.USER);
-      this.quill.setSelection((text.length + range.index), 0, Quill.sources.SILENT);
-      this.quill.scrollingContainer.scrollTop = scrollTop;
-      this.quill.focus();
-    }, 1);
+    this.quill.updateContents(delta, Quill.sources.USER);
+    this.quill.setSelection((text.length + range.index), Quill.sources.SILENT);
+    this.quill.scrollIntoView();
   }
 }
 

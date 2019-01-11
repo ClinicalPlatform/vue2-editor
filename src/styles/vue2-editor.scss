@@ -1,17 +1,13 @@
-.quill-wrapper {
+.quill-wrapper, .ql-clipboard {
   white-space: pre;
-  &.quill-preview {
-    .ql-toolbar {
-      display: none;
-    }
-    .ql-container {
-      border: none;
-    }
-    &.quill-hide {
-      .ql-container {
-        display: none;
-      }
-    }
+}
+
+.quill-preview {
+  .ql-toolbar, &.quill-hide .ql-container {
+    display: none;
+  }
+  .ql-container {
+    border: none;
   }
 }
 
