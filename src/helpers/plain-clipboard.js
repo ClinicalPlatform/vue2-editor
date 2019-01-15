@@ -23,6 +23,9 @@ class PlainClipboard extends Clipboard {
   }
 
   onCaptureCopy(e, isCut = false) {
+    // clipboardData items がない場合はデフォルトの挙動を取る
+    if (!e.clipboardData.items) return;
+
     if (e.defaultPrevented) return;
     e.preventDefault();
 
@@ -63,6 +66,12 @@ class PlainClipboard extends Clipboard {
   }
 
   onPaste (e) {
+    // clipboardData items がない場合はデフォルトの挙動を取る
+    if (!e.clipboardData.items) {
+      super.onPaste(e);
+      return;
+    };
+
     if (e.defaultPrevented || !this.quill.isEnabled()) return;
     e.preventDefault();
 
