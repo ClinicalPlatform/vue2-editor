@@ -1,16 +1,13 @@
 <template>
-  <div class="quill-wrapper" :class="{ 'quill-preview': preview, 'quill-hide': hide }"><slot name="toolbar"></slot><div :id="id" ref="quillContainer"></div><input v-if="useCustomImageHandler" @change="emitImageInfo($event)" ref="fileInput" id="file-upload" type="file" accept="image/*" style="display:none;"></div>
+  <div class="quill-wrapper" :class="{ 'ql-preview': preview, 'quill-hide': hide }"><slot name="toolbar"></slot><div :id="id" ref="quillContainer"></div><input v-if="useCustomImageHandler" @change="emitImageInfo($event)" ref="fileInput" id="file-upload" type="file" accept="image/*" style="display:none;"></div>
 </template>
 
 <script>
-import _Quill from "quill";
+import Quill from "./helpers/index";
 import defaultToolbar from "./helpers/default-toolbar";
 import merge from "lodash.merge";
 import oldApi from "./helpers/old-api";
 import MarkdownShortcuts from "./helpers/markdown-shortcuts";
-import PlainClipboard from "./helpers/plain-clipboard";
-
-const Quill = window.Quill || _Quill;
 
 export default {
   name: "VueEditor",
@@ -36,7 +33,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    editorToolbar:  {
+    editorToolbar: {
       type: Array,
       default: null,
     },
@@ -56,18 +53,17 @@ export default {
   },
 
   data: () => ({
-    quill: null
+    quill: null,
+    _content: ''
   }),
 
   computed: {
     hide() { return this.preview && this.value === '' },
-    _disabled() { return this.preview || this.disabled }
+    readOnly() { return this.preview || this.disabled }
   },
 
   created() {
     this.registerCustomModules(Quill);
-    this.registerPlainClipboard();
-    this.registerPrototypes();
   },
 
   mounted() {
@@ -78,7 +74,7 @@ export default {
     initializeEditor() {
       this.setupQuillEditor();
       this.checkForCustomImageHandler();
-      this.setContent(this.value);
+      this.initialContent(this.value);
       this.registerEditorEventListeners();
       this.disableDropEvent();
       this.$emit("ready", this.quill);
@@ -90,7 +86,8 @@ export default {
         modules: this.setModules(),
         theme: "snow",
         placeholder: this.placeholder ? this.placeholder : "",
-        readOnly: this._disabled
+        preview: this.preview,
+        readOnly: this.readOnly
       };
 
       this.prepareEditorConfig(editorConfig);
@@ -124,22 +121,6 @@ export default {
       }
     },
 
-    registerPlainClipboard() {
-      Quill.register("modules/clipboard", PlainClipboard, true);
-    },
-
-    registerPrototypes() {
-      const self = this;
-      Quill.prototype.getHTML = function() {
-        return this.root.innerHTML;
-      };
-      Quill.prototype.getWordCount = function() {
-        return this.root.innerText.length;
-      };
-      Quill.prototype.isPreview = function() {
-        return self.preview;
-      };
-    },
 
     registerEditorEventListeners() {
       this.quill.on("text-change", this.handleTextChange);
@@ -161,9 +142,9 @@ export default {
     },
 
     handleTextChange() {
-      let editorContent =
-        this.quill.getHTML() === "<p><br></p>" ? "" : this.quill.getHTML();
-      this.$emit("input", editorContent);
+      const html = this.quill.getHTML();
+      this._content = html === "<p><br></p>" ? "" : html;
+      this.$emit("input", this._content);
     },
 
     checkForCustomImageHandler() {
@@ -198,22 +179,21 @@ export default {
       });
     },
 
-    setContent(value) {
+    initialContent(value) {
       this.quill.root.innerHTML = value;
       this.quill.update(Quill.sources.API);
-      this.quill.setSelection(this.quill.getLength(), Quill.sources.SILENT);
     }
   },
 
   watch: {
     value(val) {
-      if (this.quill.hasFocus()) return;
-      if (val !== this.quill.getHTML()) {
-        this.setContent(val);
+      if (val !== this._content) {
+        this.initialContent(val);
       }
     },
-    _disabled(status) {
+    readOnly(status) {
       this.quill.enable(!status);
+      this.quill.setPreview(this.preview);
     }
   },
 

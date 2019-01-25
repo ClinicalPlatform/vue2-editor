@@ -1,4 +1,4 @@
-import Quill from "quill";
+import Quill from "./index";
 let BlockEmbed = Quill.import("blots/block/embed");
 class HorizontalRule extends BlockEmbed {}
 HorizontalRule.blotName = "hr";

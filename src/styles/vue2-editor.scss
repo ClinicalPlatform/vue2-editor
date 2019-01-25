@@ -1,12 +1,12 @@
-.quill-wrapper, .ql-clipboard {
-  white-space: pre;
+.quill-wrapper, .ql-clipboard * {
+  white-space: pre !important;
 }
 
-.quill-preview {
-  .ql-toolbar, &.quill-hide .ql-container {
+.ql-preview {
+  .ql-toolbar, &.quill-hide {
     display: none;
   }
-  .ql-container {
+  .ql-toolbar, .ql-container {
     border: none;
   }
 }
