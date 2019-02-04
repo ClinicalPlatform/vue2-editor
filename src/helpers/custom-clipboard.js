@@ -25,6 +25,7 @@ class CustomClipboard extends Clipboard {
 
   onCaptureCopy(e, isCut = false) {
     // clipboardData items がない場合はデフォルトの挙動を取る
+    // See: https://webkit.org/blog/8170/clipboard-api-improvements/
     if (!e.clipboardData.items) return;
 
     if (e.defaultPrevented) return;
@@ -74,6 +75,7 @@ class CustomClipboard extends Clipboard {
 
   onPaste (e) {
     // clipboardData items がない場合はデフォルトの挙動を取る
+    // See: https://webkit.org/blog/8170/clipboard-api-improvements/
     if (!e.clipboardData.items) {
       super.onPaste(e);
       return;
