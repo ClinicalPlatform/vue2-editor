@@ -1,9 +1,11 @@
 /**
  * Vue2-Editor
  */
-import VueEditor from './VueEditor.vue'
-import _Quill from 'quill'
-const Quill = window.Quill || _Quill
+import Quill from "./helpers/index";
+import VueEditor from './VueEditor.vue';
+import CustomClipboard from "./helpers/custom-clipboard";
+
+Quill.register("modules/clipboard", CustomClipboard, true);
 
 const Vue2Editor = {
   VueEditor,

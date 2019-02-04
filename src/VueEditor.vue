@@ -1,15 +1,13 @@
 <template>
-  <div class="quillWrapper"><slot name="toolbar"></slot><div :id="id" ref="quillContainer"></div><input v-if="useCustomImageHandler" @change="emitImageInfo($event)" ref="fileInput" id="file-upload" type="file" accept="image/*" style="display:none;"></div>
+  <div class="quill-wrapper" :class="{ 'ql-preview': preview, 'quill-hide': hide }"><slot name="toolbar"></slot><div :id="id" ref="quillContainer"></div><input v-if="useCustomImageHandler" @change="emitImageInfo($event)" ref="fileInput" id="file-upload" type="file" accept="image/*" style="display:none;"></div>
 </template>
 
 <script>
-import _Quill from "quill";
+import Quill from "./helpers/index";
 import defaultToolbar from "./helpers/default-toolbar";
 import merge from "lodash.merge";
 import oldApi from "./helpers/old-api";
 import MarkdownShortcuts from "./helpers/markdown-shortcuts";
-
-const Quill = window.Quill || _Quill;
 
 export default {
   name: "VueEditor",
@@ -28,9 +26,17 @@ export default {
       default: ""
     },
     disabled: {
-      type: Boolean
+      type: Boolean,
+      default: false,
     },
-    editorToolbar: Array,
+    preview: {
+      type: Boolean,
+      default: false,
+    },
+    editorToolbar: {
+      type: Array,
+      default: null,
+    },
     editorOptions: {
       type: Object,
       required: false,
@@ -43,16 +49,24 @@ export default {
     useMarkdownShortcuts: {
       type: Boolean,
       default: false
-    }
+    },
   },
 
   data: () => ({
-    quill: null
+    quill: null,
+    _content: ''
   }),
 
-  mounted() {
+  computed: {
+    hide() { return this.preview && this.value === '' },
+    readOnly() { return this.preview || this.disabled }
+  },
+
+  created() {
     this.registerCustomModules(Quill);
-    this.registerPrototypes();
+  },
+
+  mounted() {
     this.initializeEditor();
   },
 
@@ -60,7 +74,7 @@ export default {
     initializeEditor() {
       this.setupQuillEditor();
       this.checkForCustomImageHandler();
-      this.handleInitialContent();
+      this.initialContent(this.value);
       this.registerEditorEventListeners();
       this.disableDropEvent();
       this.$emit("ready", this.quill);
@@ -72,7 +86,8 @@ export default {
         modules: this.setModules(),
         theme: "snow",
         placeholder: this.placeholder ? this.placeholder : "",
-        readOnly: this.disabled ? this.disabled : false
+        preview: this.preview,
+        readOnly: this.readOnly
       };
 
       this.prepareEditorConfig(editorConfig);
@@ -106,14 +121,6 @@ export default {
       }
     },
 
-    registerPrototypes() {
-      Quill.prototype.getHTML = function() {
-        return this.container.querySelector(".ql-editor").innerHTML;
-      };
-      Quill.prototype.getWordCount = function() {
-        return this.container.querySelector(".ql-editor").innerText.length;
-      };
-    },
 
     registerEditorEventListeners() {
       this.quill.on("text-change", this.handleTextChange);
@@ -129,19 +136,15 @@ export default {
       });
     },
 
-    handleInitialContent() {
-      if (this.value) this.quill.root.innerHTML = this.value; // Set initial editor content
-    },
-
     handleSelectionChange(range, oldRange) {
       if (!range && oldRange) this.$emit("blur", this.quill);
       else if (range && !oldRange) this.$emit("focus", this.quill);
     },
 
     handleTextChange() {
-      let editorContent =
-        this.quill.getHTML() === "<p><br></p>" ? "" : this.quill.getHTML();
-      this.$emit("input", editorContent);
+      const html = this.quill.getHTML();
+      this._content = html === "<p><br></p>" ? "" : html;
+      this.$emit("input", this._content);
     },
 
     checkForCustomImageHandler() {
@@ -174,17 +177,23 @@ export default {
         e.preventDefault();
         return false;
       });
+    },
+
+    initialContent(value) {
+      this.quill.root.innerHTML = value;
+      this.quill.update(Quill.sources.API);
     }
   },
 
   watch: {
     value(val) {
-      if (val != this.quill.root.innerHTML && !this.quill.hasFocus()) {
-        this.quill.root.innerHTML = val;
+      if (val !== this._content) {
+        this.initialContent(val);
       }
     },
-    disabled(status) {
+    readOnly(status) {
       this.quill.enable(!status);
+      this.quill.setPreview(this.preview);
     }
   },
 
@@ -195,7 +204,5 @@ export default {
 };
 </script>
 
-<style src="quill/dist/quill.snow.css">
-</style>
-<style src="./styles/vue2-editor.scss" lang='scss'>
-</style>
+<style src="quill/dist/quill.snow.css"></style>
+<style src="./styles/vue2-editor.scss" lang='scss'></style>
