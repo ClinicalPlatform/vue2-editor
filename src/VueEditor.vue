@@ -10,6 +10,7 @@ import oldApi from "./helpers/old-api";
 import MarkdownShortcuts from "./helpers/markdown-shortcuts";
 
 const Quill = window.Quill || _Quill;
+const template = new Quill(document.createElement("div"));
 
 export default {
   name: "VueEditor",
@@ -47,7 +48,8 @@ export default {
   },
 
   data: () => ({
-    quill: null
+    quill: null,
+    _content: ''
   }),
 
   mounted() {
@@ -60,7 +62,7 @@ export default {
     initializeEditor() {
       this.setupQuillEditor();
       this.checkForCustomImageHandler();
-      this.handleInitialContent();
+      this.handleInitialContent(this.value);
       this.registerEditorEventListeners();
       this.disableDropEvent();
       this.$emit("ready", this.quill);
@@ -129,8 +131,9 @@ export default {
       });
     },
 
-    handleInitialContent() {
-      if (this.value) this.quill.root.innerHTML = this.value; // Set initial editor content
+    handleInitialContent(html) {
+      const _html = typeof html === 'string' ? `${html}<p><br></p>` : html;
+      this.quill.setContents(this.quill.clipboard.convert(_html), Quill.sources.SILENT);
     },
 
     handleSelectionChange(range, oldRange) {
@@ -139,9 +142,10 @@ export default {
     },
 
     handleTextChange() {
-      let editorContent =
-        this.quill.getHTML() === "<p><br></p>" ? "" : this.quill.getHTML();
-      this.$emit("input", editorContent);
+      template.setContents(this.quill.getContents());
+      const html = template.root.innerHTML;
+      this._content = html === "<p><br></p>" ? "" : html;
+      this.$emit("input", this._content);
     },
 
     checkForCustomImageHandler() {
@@ -179,8 +183,8 @@ export default {
 
   watch: {
     value(val) {
-      if (val != this.quill.root.innerHTML && !this.quill.hasFocus()) {
-        this.quill.root.innerHTML = val;
+      if (val !== this._content) {
+        this.handleInitialContent(val);
       }
     },
     disabled(status) {
@@ -195,7 +199,5 @@ export default {
 };
 </script>
 
-<style src="quill/dist/quill.snow.css">
-</style>
-<style src="./styles/vue2-editor.scss" lang='scss'>
-</style>
+<style src="quill/dist/quill.snow.css"></style>
+<style src="./styles/vue2-editor.scss" lang='scss'></style>
