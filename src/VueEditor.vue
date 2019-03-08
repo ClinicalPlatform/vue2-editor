@@ -133,7 +133,7 @@ export default {
 
     handleInitialContent(html) {
       const _html = typeof html === 'string' ? `${html}<p><br></p>` : html;
-      this.quill.setContents(this.quill.clipboard.convert(_html), Quill.sources.SILENT);
+      this.quill.setContents(this.quill.clipboard.convert(_html), Quill.sources.API);
     },
 
     handleSelectionChange(range, oldRange) {
