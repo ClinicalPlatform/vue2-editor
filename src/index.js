@@ -3,7 +3,10 @@
  */
 import VueEditor from './VueEditor.vue'
 import _Quill from 'quill'
+import CustomClipboard from "./helpers/custom-clipboard";
+
 const Quill = window.Quill || _Quill
+Quill.register("modules/clipboard", CustomClipboard, true);
 
 const Vue2Editor = {
   VueEditor,
