@@ -142,10 +142,12 @@ export default {
     },
 
     handleTextChange() {
-      template.setContents(this.quill.getContents());
-      const html = template.root.innerHTML;
-      this._content = html === "<p><br></p>" ? "" : html;
-      this.$emit("input", this._content);
+      let html = this.quill.root.innerHTML;
+      html = typeof html === 'string' ? `${html}<p><br></p>` : html;
+      template.setContents(this.quill.clipboard.convert(html), Quill.sources.SILENT);
+      html = template.root.innerHTML;
+      this._content = html === '<p><br></p>' ? '' : html;
+      this.$emit('input', this._content);
     },
 
     checkForCustomImageHandler() {
